@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kasir AI
 
-## Getting Started
+Sistem Point of Sale (POS) berbasis Next.js dengan fitur:
+- Manajemen produk dan kategori
+- Keranjang dan checkout transaksi
+- Smart search produk berbasis AI
+- AI Assistant (chat streaming + tool calling)
+- AI Analytics untuk analisis penjualan berbasis bahasa natural
 
-First, run the development server:
+## Tech Stack
+
+- `Next.js 16` (App Router)
+- `React 19` + TypeScript
+- `Prisma ORM`
+- `PostgreSQL`
+- `LangChain` + `Google Gemini`
+- UI components: `shadcn/ui`, `Tailwind CSS`
+
+## Halaman Utama
+
+- `/kasir` -> UI POS utama (produk, keranjang, AI assistant)
+- `/analytics` -> dashboard analytics + AI analyst
+
+## Prasyarat
+
+- Node.js 20+
+- PostgreSQL aktif
+- API key Google Gemini
+
+## Environment Variables
+
+Buat file `.env.local` (atau `.env`) dengan isi minimal:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/kasir_ai?schema=public"
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+```
+
+Catatan:
+- Prisma config berada di `prisma.config.ts`, jadi perintah Prisma membaca `DATABASE_URL` dari environment.
+- Pastikan user PostgreSQL punya privilege `USAGE` dan `CREATE` pada schema `public`.
+
+## Instalasi
+
+```bash
+npm install
+```
+
+## Setup Database
+
+Generate Prisma client:
+
+```bash
+npm run db:generate
+```
+
+Push schema ke database:
+
+```bash
+npm run db:push
+```
+
+Seed data awal:
+
+```bash
+npm run db:seed
+```
+
+Jika ingin reset total:
+
+```bash
+npm run db:reset
+```
+
+## Menjalankan Project
+
+Development:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Akses aplikasi:
+- `http://localhost:3000/kasir`
+- `http://localhost:3000/analytics`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` -> jalankan Next.js dev server
+- `npm run build` -> build production
+- `npm run start` -> jalankan server production
+- `npm run lint` -> lint project
+- `npm run db:generate` -> generate Prisma client
+- `npm run db:push` -> sinkronkan schema Prisma ke DB
+- `npm run db:seed` -> isi data awal
+- `npm run db:studio` -> buka Prisma Studio
+- `npm run db:reset` -> reset schema + seed ulang
 
-## Learn More
+## API Endpoints
 
-To learn more about Next.js, take a look at the following resources:
+- `GET /api/health` -> cek koneksi DB + jumlah data utama
+- `GET /api/products` -> ambil daftar produk
+- `POST /api/search` -> pencarian produk berbasis AI parser
+- `POST /api/chat` -> AI assistant streaming (SSE)
+- `GET|POST /api/transactions` -> list transaksi / create transaksi
+- `POST /api/analytics` -> analisis penjualan dengan AI
+- `GET /api/analytics/quick` -> quick stats ringkas
+- `GET /api/test-ai` -> test koneksi model AI
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Struktur Direktori Ringkas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```txt
+src/
+  app/
+    kasir/page.tsx
+    analytics/page.tsx
+    api/
+  components/
+    pos/
+    analytics/
+    ui/
+  lib/
+    ai/
+    db.ts
+prisma/
+  schema.prisma
+  seed.ts
+```
 
-## Deploy on Vercel
+## Troubleshooting Singkat
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Error `permission denied for schema public` saat `prisma db push`:
+   - Grant privilege schema ke user app di PostgreSQL:
+   - `GRANT USAGE, CREATE ON SCHEMA public TO <db_user>;`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. AI endpoint gagal:
+   - Cek `GEMINI_API_KEY` sudah terisi valid.
+   - Coba endpoint `GET /api/test-ai`.
