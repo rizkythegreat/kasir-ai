@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------
+// CATEGORY
+// ------------------------------------
+model Category {
+  id String @id @default(cuid())
+  name String
+  description String?
+  icon String?
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ------------------------------------
+// PRODUCT
+// ------------------------------------
+model Product {
+  id String @id @default(cuid())
+  name String
+  description String?
+  price Float
+  cost Float?
+  stock Int @default(0)
+  minStock Int @default(5)
+  sku String @unique
+  barcode String?
+  imageUrl String?
+  isActive Boolean @default(true)
+
+  categoryId String
+  category Category @relation(fields: [categoryId], references: [id])
+
+  transactionItems TransactionItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([sku])
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+// ------------------------------------
+// TRANSACTION
+// ------------------------------------
+model Transaction {
+  id String @id @default(cuid())
+  invoiceNumber String @unique
+
+  subtotal Float
+  discountAmount Float @default(0)
+  discountPercent Float @default(0)
+  taxAmount Float @default(0)
+  taxPercent Float @default(0)
+  total Float
+
+  paymentMethod String
+  amountPaid Float
+  changeAmount Float @default(0)
+
+  status String @default("completed") // completed, voided, pending
+  notes String?
+
+  cashierName String?
+
+  items TransactionItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@index([paymentMethod])
+
+}
+
+// ------------------------------------
+// TRANSACTION ITEM
+// ------------------------------------
+model TransactionItem {
+  id String @id @default(cuid())
+
+  quantity Int
+  unitPrice Float
+  subtotal Float
+  discountAmount Float @default(0)
+
+  productName String
+  productSku String
+
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+
+  transactionId String
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([transactionId])
+}
