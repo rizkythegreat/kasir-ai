@@ -309,7 +309,7 @@ export default function KasirPage() {
 
               <TabsContent value="ai" className="mt-4">
                 <AIAssistant
-                  className="h-[calc(100vh-320px)]"
+                  className="h-fit"
                   onProductSelect={(id) => {
                     const product = products.find(p => p.id === id)
                     if (product) {

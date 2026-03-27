@@ -263,7 +263,7 @@ ${JSON.stringify(contextData, null, 2)}
 
             output = validateOutput(output)
 
-            const chunkSize = 5
+            const chunkSize = 3
 
             for (let i = 0; i < output.length; i += chunkSize) {
               const chunk = output.slice(i, i + chunkSize)
