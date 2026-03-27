@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import ReactMarkdown from 'react-markdown'
 import {
   Send,
   Bot,
@@ -247,13 +248,6 @@ Silakan tanya apa saja! 😊`,
     { label: '💳 Metode bayar', query: 'Breakdown pembayaran hari ini' },
   ]
 
-  // Format message content (simple markdown-like)
-  const formatContent = (content: string) => {
-    return content
-      .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
-      .replace(/\\n/g, '<br/>')
-  }
-
   return (
     <div className={cn(
       'flex flex-col h-full border rounded-lg bg-background overflow-hidden',
@@ -325,12 +319,22 @@ Silakan tanya apa saja! 😊`,
                       : 'bg-muted rounded-bl-md'
                 )}
               >
-                <div
-                  className="text-sm whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{
-                    __html: formatContent(message.content)
-                  }}
-                />
+                <div className="text-sm leading-relaxed">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                      ul: ({ ...props }) => <ul className="mb-2 list-disc pl-5 last:mb-0" {...props} />,
+                      ol: ({ ...props }) => <ol className="mb-2 list-decimal pl-5 last:mb-0" {...props} />,
+                      li: ({ ...props }) => <li className="mb-1 last:mb-0" {...props} />,
+                      h1: ({ ...props }) => <h1 className="mb-2 text-base font-semibold" {...props} />,
+                      h2: ({ ...props }) => <h2 className="mb-2 text-sm font-semibold" {...props} />,
+                      h3: ({ ...props }) => <h3 className="mb-2 text-sm font-semibold" {...props} />,
+                      strong: ({ ...props }) => <strong className="font-semibold" {...props} />
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
                 <span className="text-[10px] opacity-60 mt-1 block">
                   {message.timestamp.toLocaleTimeString('id-ID', {
                     hour: '2-digit',
@@ -354,12 +358,22 @@ Silakan tanya apa saja! 😊`,
                 <Bot className="h-4 w-4 text-primary" />
               </div>
               <div className="max-w-[85%] rounded-2xl rounded-bl-md px-4 py-2.5 bg-muted">
-                <div
-                  className="text-sm whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{
-                    __html: formatContent(streamingContent)
-                  }}
-                />
+                <div className="text-sm leading-relaxed">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                      ul: ({ ...props }) => <ul className="mb-2 list-disc pl-5 last:mb-0" {...props} />,
+                      ol: ({ ...props }) => <ol className="mb-2 list-decimal pl-5 last:mb-0" {...props} />,
+                      li: ({ ...props }) => <li className="mb-1 last:mb-0" {...props} />,
+                      h1: ({ ...props }) => <h1 className="mb-2 text-base font-semibold" {...props} />,
+                      h2: ({ ...props }) => <h2 className="mb-2 text-sm font-semibold" {...props} />,
+                      h3: ({ ...props }) => <h3 className="mb-2 text-sm font-semibold" {...props} />,
+                      strong: ({ ...props }) => <strong className="font-semibold" {...props} />
+                    }}
+                  >
+                    {streamingContent}
+                  </ReactMarkdown>
+                </div>
                 <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 rounded-sm" />
               </div>
             </div>
