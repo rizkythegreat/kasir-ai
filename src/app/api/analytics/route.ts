@@ -103,15 +103,15 @@ export async function POST(req: NextRequest) {
       // 2. Daily breakdown - using raw query for grouping
       prisma.$queryRaw`
         SELECT
-          date(createdAt) as date,
-          COUNT(*) as transactions,
-          SUM(total) as revenue
-        FROM Transaction
-        WHERE createdAt >= ${startDate}
-          AND createdAt <= ${endDate}
-          AND status = 'completed'
-        GROUP BY date(createdAt)
-        ORDER BY date DESC
+          DATE("createdAt") as "date",
+          COUNT(*)::int as "transactions",
+          COALESCE(SUM("total"), 0)::float as "revenue"
+        FROM "Transaction"
+        WHERE "createdAt" >= ${startDate}
+          AND "createdAt" <= ${endDate}
+          AND "status" = 'completed'
+        GROUP BY DATE("createdAt")
+        ORDER BY "date" DESC
       ` as Promise<Array<{ date: string; transactions: number; revenue: number }>>,
 
       // 3. Top products
@@ -131,19 +131,19 @@ export async function POST(req: NextRequest) {
       // 4. Category stats
       prisma.$queryRaw`
         SELECT
-          p.categoryId,
-          c.name as categoryName,
-          COUNT(ti.id) as itemsSold,
-          SUM(ti.subtotal) as revenue
-        FROM TransactionItem ti
-        JOIN Product p ON ti.productId = p.id
-        JOIN Category c ON p.categoryId = c.id
-        JOIN Transaction t ON ti.transactionId = t.id
-        WHERE t.createdAt >= ${startDate}
-          AND t.createdAt <= ${endDate}
-          AND t.status = 'completed'
-        GROUP BY p.categoryId, c.name
-        ORDER BY revenue DESC
+          p."categoryId",
+          c."name" as "categoryName",
+          COUNT(ti."id")::int as "itemsSold",
+          COALESCE(SUM(ti."subtotal"), 0)::float as "revenue"
+        FROM "TransactionItem" ti
+        JOIN "Product" p ON ti."productId" = p."id"
+        JOIN "Category" c ON p."categoryId" = c."id"
+        JOIN "Transaction" t ON ti."transactionId" = t."id"
+        WHERE t."createdAt" >= ${startDate}
+          AND t."createdAt" <= ${endDate}
+          AND t."status" = 'completed'
+        GROUP BY p."categoryId", c."name"
+        ORDER BY "revenue" DESC
       ` as Promise<Array<{ categoryName: string; itemsSold: number; revenue: number }>>,
 
       // 5. Payment methods
@@ -160,15 +160,15 @@ export async function POST(req: NextRequest) {
       // 6. Hourly distribution
       prisma.$queryRaw`
         SELECT
-          strftime('%H', createdAt) as hour,
-          COUNT(*) as transactions,
-          SUM(total) as revenue
-        FROM Transaction
-        WHERE createdAt >= ${startDate}
-          AND createdAt <= ${endDate}
-          AND status = 'completed'
-        GROUP BY strftime('%H', createdAt)
-        ORDER BY hour
+          LPAD(EXTRACT(HOUR FROM "createdAt")::text, 2, '0') as "hour",
+          COUNT(*)::int as "transactions",
+          COALESCE(SUM("total"), 0)::float as "revenue"
+        FROM "Transaction"
+        WHERE "createdAt" >= ${startDate}
+          AND "createdAt" <= ${endDate}
+          AND "status" = 'completed'
+        GROUP BY 1
+        ORDER BY 1
       ` as Promise<Array<{ hour: string; transactions: number; revenue: number }>>,
 
       // 7. Cashier performance

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import {
   BarChart3,
   TrendingUp,
@@ -224,8 +225,21 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm max-w-none">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {analysis}
+                <div className="text-sm leading-relaxed">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                      ul: ({ ...props }) => <ul className="mb-2 list-disc pl-5 last:mb-0" {...props} />,
+                      ol: ({ ...props }) => <ol className="mb-2 list-decimal pl-5 last:mb-0" {...props} />,
+                      li: ({ ...props }) => <li className="mb-1 last:mb-0" {...props} />,
+                      h1: ({ ...props }) => <h1 className="mb-2 text-base font-semibold" {...props} />,
+                      h2: ({ ...props }) => <h2 className="mb-2 text-sm font-semibold" {...props} />,
+                      h3: ({ ...props }) => <h3 className="mb-2 text-sm font-semibold" {...props} />,
+                      strong: ({ ...props }) => <strong className="font-semibold" {...props} />
+                    }}
+                  >
+                    {analysis}
+                  </ReactMarkdown>
                 </div>
               </div>
             </CardContent>
