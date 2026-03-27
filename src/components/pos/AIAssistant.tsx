@@ -130,18 +130,52 @@ Silakan tanya apa saja! 😊`,
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let fullContent = ''
+      let buffer = ''
 
       while (true) {
         const { done, value } = await reader.read()
-        if (done) break
+        if (done) {
+          const remaining = buffer.trim()
+          if (remaining.startsWith('data: ')) {
+            const data = remaining.slice(6)
+            if (data) {
+              try {
+                const parsed = JSON.parse(data)
+                if (parsed.type === 'content') {
+                  fullContent += parsed.content
+                  setStreamingContent(fullContent)
+                } else if (parsed.type === 'done') {
+                  setMessages(prev => [...prev, {
+                    id: generateId(),
+                    role: 'assistant',
+                    content: fullContent,
+                    timestamp: new Date()
+                  }])
+                  setStreamingContent('')
+                } else if (parsed.type === 'error') {
+                  throw new Error(parsed.error)
+                }
+              } catch (parseError) {
+                // Ignore incomplete/invalid trailing event
+              }
+            }
+          }
+          break
+        }
 
-        const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split('\\n')
+        buffer += decoder.decode(value, { stream: true })
+        const events = buffer.split('\n\n')
+        buffer = events.pop() ?? ''
 
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
+        for (const event of events) {
+          const lines = event
+            .split('\n')
+            .map(line => line.trim())
+            .filter(Boolean)
+            .filter(line => line.startsWith('data: '))
 
-          const data = line.slice(6) // Remove 'data: ' prefix
+          if (lines.length === 0) continue
+          const data = lines.map(line => line.slice(6)).join('\n')
           if (!data) continue
 
           try {
